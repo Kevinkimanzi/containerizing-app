@@ -21,8 +21,11 @@ pipeline {
         stage("Sonarqube Analysis") {
             steps {
                 withSonarQubeEnv('sonar-server') {
-                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=to-do\
-                    -Dsonar.projectKey=to-do'''
+                    sh '''$SCANNER_HOME/bin/sonar-scanner \
+                    -Dsonar.projectKey=to-do \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.login=sqp_85cb7daa25d523879643cc4f81ce7be74d667f58'''
                 }
             }
         }
