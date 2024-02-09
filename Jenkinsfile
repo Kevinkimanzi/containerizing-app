@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('clean workspace') {
             steps {
-                sh "mvn clean clean workplace"
+                sh "mvn clean workplace"
             }
         }
         stage('Checkout from Git') {
