@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('clean workspace') {
             steps {
-                cleanWs()
+                sh "mvn clean clean workplace"
             }
         }
         stage('Checkout from Git') {
@@ -18,14 +18,18 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/Kevinkimanzi/containerizing-app'
             }
         }
-        stage("Sonarqube Analysis") {
-            steps {
+        stage("Test Cases"){
+            steps{
+                sh "mvn test"
+            }
+        }
+        stage("Sonarqube Analysis "){
+            steps{
                 withSonarQubeEnv('sonar-server') {
-                    sh '''$SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectKey=to-do \
-                    -Dsonar.sources=. \
-                    -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.login=sqp_85cb7daa25d523879643cc4f81ce7be74d667f58'''
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=to-do \
+                    -Dsonar.java.binaries=. \
+                    -Dsonar.projectKey=to-do '''
+    
                 }
             }
         }
