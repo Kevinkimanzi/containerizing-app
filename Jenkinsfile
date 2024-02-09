@@ -18,14 +18,7 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/Kevinkimanzi/containerizing-app'
             }
         }
-        stage("Sonarqube Analysis") {
-            steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=to-do \
-                    -Dsonar.projectKey=to-do'''
-                }
-            }
-        }
+        
         stage("quality gate") {
             steps {
                 script {
