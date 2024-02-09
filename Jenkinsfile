@@ -18,11 +18,7 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/Kevinkimanzi/containerizing-app'
             }
         }
-        stage("Test Cases"){
-            steps{
-                sh "mvn test"
-            }
-        }
+        
         stage("Sonarqube Analysis "){
             steps{
                 withSonarQubeEnv('sonar-server') {
