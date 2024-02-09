@@ -19,16 +19,13 @@ pipeline {
             }
         }
         stage("Sonarqube Analysis") {
-    steps {
-        withSonarQubeEnv('sonar-server') {
-            echo 'Running SonarQube analysis'
-            sh '''echo "SCANNER_HOME: $SCANNER_HOME"
-                $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=to-do \
-                -Dsonar.projectKey=to-do'''
-            echo 'SonarQube analysis completed'
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=to-do\
+                    -Dsonar.projectKey=to-do'''
+                }
+            }
         }
-    }
-}
 
         stage("quality gate") {
             steps {
