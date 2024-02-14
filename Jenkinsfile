@@ -6,7 +6,6 @@ pipeline {
     }
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
     }
     stages {
         stage('clean workspace') {
@@ -16,55 +15,55 @@ pipeline {
         }
         stage('Checkout from Git') {
             steps {
-                git branch: 'main', url: 'https://github.com/Kevinkimanzi/containerizing-app'
+                git branch: 'main', url: 'https://github.com/Kevinkimanzi/containerizing-app.git'
             }
         }
-        
-        stage("Sonarqube Analysis "){
-            steps{
+        stage("Sonarqube Analysis") {
+            steps {
                 withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=app \
-                    -Dsonar.java.binaries=. \
-                    -Dsonar.projectKey=app '''
-    
+                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=to-do \
+                    -Dsonar.projectKey=to-do'''
                 }
             }
         }
-
         stage("quality gate") {
             steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
                 }
             }
         }
-        
-
-        stage('Build') {
-
-			steps {
-				sh 'docker build -t kevinkimanzi4/to-do:v1.0.0.1 .'
-			}
-		}
-
-		stage('Login') {
-
-			steps {
-				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-			}
-		}
-
-		stage('Push') {
-
-			steps {
-				sh 'docker push thetips4you/nodeapp_test:latest'
-			}
-		}
-        
         stage('Install Dependencies') {
             steps {
                 sh "npm install"
             }
         }
-    }
+        stage('TRIVY FS SCAN') {
+            steps {
+                sh "trivy fs . > trivyfs.txt"
+            }
+        }
+        stage("Docker Build & Push"){
+            steps{
+                script{
+                withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){   
+                    sh "docker build -t to-do ."
+                    sh "docker tag to-do kevinkimanzi4/to-do:latest "
+                    sh "docker push kevinkimanzi4/to-do:latest "
+                    }
+                }
+            }
+        }
+        stage("TRIVY"){
+            steps{
+                sh "trivy image kevinkimanzi4/to-do:latest > trivyimage.txt" 
+            }
+        }
+        stage('Deploy to container'){
+            steps{
+                sh 'docker run -d  kevinkimanzi4/to-do:latest'
+            }
+        }
+        
+    }   
 }
